@@ -33,25 +33,9 @@ const routes = [
 					title: "个人中心"
 				},
 				component: () => import('@/views/UserCenter.vue')
-			},
-			// {
-			// 	path: '/sys/users',
-			// 	name: 'SysUser',
-			// 	component: User
-			// },
-			// {
-			// 	path: '/sys/roles',
-			// 	name: 'SysRole',
-			// 	component: Role
-			// },
-			// {
-			// 	path: '/sys/menus',
-			// 	name: 'SysMenu',
-			// 	component: Menu
-			// },
+			}
 		]
 	},
-
 	{
 		path: '/login',
 		name: 'Login',
@@ -66,65 +50,47 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-
 	let hasRoute = store.state.menus.hasRoutes
-
 	let token = localStorage.getItem("token")
-
 	if (to.path == '/login') {
 		next()
-
 	} else if (!token) {
+		//没有登录 跳转登录
 		next({path: '/login'})
-
-
 	} else if(token && !hasRoute) {
+		//有登陆，但是没有路由权限
 		axios.get("/sys/menu/nav", {
 			headers: {
 				Authorization: localStorage.getItem("token")
 			}
 		}).then(res => {
-
 			console.log(res.data.data)
-
 			// 拿到menuList
 			store.commit("setMenuList", res.data.data.nav)
-
 			// 拿到用户权限
 			store.commit("setPermList", res.data.data.authoritys)
-
 			console.log(store.state.menus.menuList)
-
 			// 动态绑定路由
 			let newRoutes = router.options.routes
-
 			res.data.data.nav.forEach(menu => {
 				if (menu.children) {
 					menu.children.forEach(e => {
-
 						// 转成路由
 						let route = menuToRoute(e)
-
 						// 吧路由添加到路由管理中
 						if (route) {
 							newRoutes[0].children.push(route)
 						}
-
 					})
 				}
 			})
-
 			console.log("newRoutes")
 			console.log(newRoutes)
 			router.addRoutes(newRoutes)
-
 			hasRoute = true
 			store.commit("changeRouteStatus", hasRoute)
 		})
 	}
-
-
-
 	next()
 })
 

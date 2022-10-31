@@ -33,7 +33,9 @@
 			<el-main>
 				<Tabs></Tabs>
 				<div style="margin: 0 15px;">
-					<router-view/>
+          <keep-alive>
+					  <router-view/>
+          </keep-alive>
 				</div>
 			</el-main>
 		</el-container>
